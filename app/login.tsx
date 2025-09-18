@@ -1,52 +1,93 @@
-import { Redirect, Stack } from 'expo-router';
-import React, 'useState', useEffect } from 'react';
-import { ActivityIndicator, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Stack, useRouter } from 'expo-router';
+import { initializeApp } from 'firebase/app';
+import { collection, getDocs, getFirestore, limit, query, where } from 'firebase/firestore';
+import React, { useState } from 'react';
+import { ActivityIndicator, Alert, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity } from 'react-native';
+import { firebaseConfig } from '../FirebaseConfig';
 
-// This layout is the "brain" and the "gatekeeper" for all producer-only screens.
-export default function ProtectedLayout() {
-  // We use a state to track the session status:
-  // undefined = we are currently checking
-  // null = no session found
-  // string = session exists
-  const [session, setSession] = useState<string | null | undefined>(undefined);
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-  useEffect(() => {
-    const checkSession = async () => {
-      const userSession = await AsyncStorage.getItem('userSession');
-      setSession(userSession);
+export default function LoginScreen() {
+    const [email, setEmail] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const router = useRouter();
+
+    const handleLogin = async () => {
+        if (!email) {
+            Alert.alert("Input Required", "Please enter your email address.");
+            return;
+        }
+        setIsLoading(true);
+
+        try {
+            const q = query(collection(db, "applications"), where("email", "==", email.trim().toLowerCase()), limit(1));
+            const querySnapshot = await getDocs(q);
+
+            if (querySnapshot.empty) {
+                Alert.alert("Login Failed", "This email is not registered.");
+                setIsLoading(false);
+                return;
+            }
+
+            const applicantDoc = querySnapshot.docs[0].data();
+
+            if (applicantDoc.status !== 'APPROVED') {
+                Alert.alert("Login Failed", "Your application has not been approved by an NMPB admin yet.");
+                setIsLoading(false);
+                return;
+            }
+
+            // --- THE NEW LOGIC ---
+            // 1. Create the user session object
+            const userSession = {
+                email: applicantDoc.email,
+                fullName: applicantDoc.fullName,
+            };
+
+            // 2. Save the session directly to the phone's storage
+            await AsyncStorage.setItem('userSession', JSON.stringify(userSession));
+            console.log("User session saved for:", userSession.fullName);
+
+            // 3. Navigate the user into the protected zone
+            router.replace('/farmer');
+
+        } catch (error) {
+            console.error("Login error:", error);
+            Alert.alert("Error", "An error occurred during login.");
+        } finally {
+            setIsLoading(false);
+        }
     };
-    checkSession();
 
-    // --- NEW LOGIC: The Cleanup Function ---
-    // This function runs automatically when the user navigates *away* from this layout.
-    // It's the perfect place to handle the logout.
-    return () => {
-      const clearSessionOnExit = async () => {
-        console.log("Exiting protected zone, clearing session.");
-        await AsyncStorage.removeItem('userSession');
-      };
-      clearSessionOnExit();
-    };
-  }, []);
-
-  // 1. Show a loading spinner while we check for a user session.
-  if (session === undefined) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#1C2A3A" />
-      </View>
+        <SafeAreaView style={styles.container}>
+            <Stack.Screen options={{ title: 'Producer Login' }} />
+            <Text style={styles.title}>Producer Portal</Text>
+            <Text style={styles.subtitle}>Enter the email associated with your approved application.</Text>
+            <TextInput
+                style={styles.input}
+                placeholder="Email"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+            />
+            <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={isLoading}>
+                {isLoading ? <ActivityIndicator color="white" /> : <Text style={styles.buttonText}>Login</Text>}
+            </TouchableOpacity>
+        </SafeAreaView>
     );
-  }
-
-  // 2. If, after checking, there is no session, redirect to the login screen.
-  if (session === null) {
-    return <Redirect href="/login" />;
-  }
-
-  // 3. If a session string exists, the user is logged in. Show the content.
-  // We use a Stack navigator here so screens within the protected zone can navigate
-  // between each other (e.g., from the dashboard to the record harvest screen).
-  return <Stack screenOptions={{ headerShown: false }} />;
 }
+
+const styles = StyleSheet.create({
+    container: { flex: 1, justifyContent: 'center', padding: 20, backgroundColor: '#F4F7F9' },
+    title: { fontFamily: 'Poppins_700Bold', fontSize: 28, textAlign: 'center', marginBottom: 10, color: '#1C2A3A' },
+    subtitle: { fontFamily: 'Poppins_400Regular', fontSize: 16, textAlign: 'center', marginBottom: 40, color: 'gray' },
+    input: { fontFamily: 'Poppins_400Regular', backgroundColor: 'white', padding: 15, borderRadius: 10, fontSize: 16, marginBottom: 20, borderWidth: 1, borderColor: '#ddd' },
+    button: { backgroundColor: '#2a9d8f', padding: 18, borderRadius: 12, alignItems: 'center' },
+    buttonText: { fontFamily: 'Poppins_700Bold', color: 'white', fontSize: 16 },
+});
 
