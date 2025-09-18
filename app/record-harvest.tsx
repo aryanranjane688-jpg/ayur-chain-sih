@@ -82,6 +82,7 @@ export default function RecordHarvestScreen() {
       timestamp: new Date().toISOString(),
       previousHash,
       complianceStatus: complianceStatus.status as "COMPLIANT" | "OUT_OF_SEASON" | "PROTECTED_ZONE" | "NO_RULES", // Store the compliance result
+      sustainabilityBonus: 0, // Initialize earnings to zero for this batch
       farm: randomFarm,
       weather: randomWeather
     };
