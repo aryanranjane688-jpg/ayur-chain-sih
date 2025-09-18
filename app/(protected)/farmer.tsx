@@ -1,11 +1,11 @@
-import React, { useState, useCallback } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, SafeAreaView, ActivityIndicator } from 'react-native';
+import { FontAwesome5 } from '@expo/vector-icons';
 import { Link, Stack, useFocusEffect, useRouter } from 'expo-router';
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, getDocs, query, orderBy } from 'firebase/firestore';
-import { firebaseConfig } from '../FirebaseConfig';
-import { HarvestBatch } from './index';
-import { FontAwesome5 } from '@expo/vector-icons';
+import { collection, getDocs, getFirestore, orderBy, query } from 'firebase/firestore';
+import React, { useCallback, useState } from 'react';
+import { FlatList, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { firebaseConfig } from '../../FirebaseConfig';
+import { HarvestBatch } from '.././index';
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);

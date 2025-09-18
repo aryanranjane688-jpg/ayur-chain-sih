@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ActivityIndicator, Alert, ScrollView, TouchableOpacity } from 'react-native';
-import { Stack, useRouter } from 'expo-router';
-import * as Location from 'expo-location';
-import { checkCompliance, getAvailablePlants } from '../complianceRules';
-import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import * as Crypto from 'expo-crypto';
-import { firebaseConfig } from '../FirebaseConfig';
-import { HarvestBatch } from './index';
+import * as Location from 'expo-location';
+import { Stack, useRouter } from 'expo-router';
+import { initializeApp } from 'firebase/app';
+import { addDoc, collection, getDocs, getFirestore, limit, orderBy, query } from 'firebase/firestore';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { checkCompliance, getAvailablePlants } from '../../complianceRules';
+import { firebaseConfig } from '../../FirebaseConfig';
+import { HarvestBatch } from '.././index';
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);

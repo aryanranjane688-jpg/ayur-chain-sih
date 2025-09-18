@@ -42,7 +42,7 @@ export default function RoleSelectionScreen() {
 
         <View style={styles.cardContainer}>
           <RoleCard href="/farmer" iconName="tractor" title="Producer" description="Commit a new harvest to the live ledger and generate its unique identity." color="#2a9d8f" />
-          <RoleCard href="/manager" iconName="tasks" title="Manager" description="View all batches and add supply chain events like testing and processing." color="#f4a261" />
+          <RoleCard href="/manager" iconName="tasks" title="BirdView" description="View all batches and add supply chain events like testing and processing." color="#f4a261" />
           <RoleCard href="/consumer" iconName="qrcode" title="Consumer" description="Scan a product to verify its origin and view its full, immutable history." color="#e76f51" />
         </View>
       </ScrollView>

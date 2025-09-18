@@ -1,7 +1,7 @@
+import { Poppins_400Regular, Poppins_700Bold, useFonts } from '@expo-google-fonts/poppins';
 import { Stack } from 'expo-router';
-import React, { useEffect } from 'react';
-import { useFonts, Poppins_400Regular, Poppins_700Bold } from '@expo-google-fonts/poppins';
 import * as SplashScreen from 'expo-splash-screen';
+import React, { useEffect } from 'react';
 import { StatusBar } from 'react-native';
 
 SplashScreen.preventAutoHideAsync();
